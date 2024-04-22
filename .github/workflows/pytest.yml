@@ -26,4 +26,4 @@ jobs:
         pipenv install -d
     - name: Analysing the code with pytest
       run: |
-        pytest -v --cov
+        python -m pytest -v --cov
