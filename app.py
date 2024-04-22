@@ -1,5 +1,5 @@
 """
-This script creates a Flask app that uses a trained LSTM model to predict future stock prices.
+This script creates a Flask app that uses a trained LSTM model to predict future bitcoin prices.
 """
 from flask import Flask, request, jsonify
 import numpy as np
@@ -12,12 +12,15 @@ from sklearn.preprocessing import MinMaxScaler
 # Load the trained LSTM model
 model = load_model('model.h5')  # Path to trained model
 
-# Load the MinMaxScaler used in training
-scaler = MinMaxScaler()
-scaler.fit([[0], [1]])  # Adjust to the feature range and shape you used in training
-
-df = pd.read_csv('output.csv')  # Path to dataset
+df = pd.read_csv('output.csv')
+high_data = df['High'].max()
+low_data = df['Low'].max()
 TIME_STEP = 15  # Adjust according to the time step used in training
+
+# Load the MinMaxScaler used in training
+scaler = MinMaxScaler(feature_range=(0, 1))
+scaler.fit([[0], [1]])  # Adjust to the feature range and shape you used in training
+scaling_factors = [round(100 - i*0.25, 2) for i in range(0, 400)]
 
 
 # Define a function to predict future prices
@@ -84,9 +87,20 @@ def create_app():
 
         # Make predictions
         predictions = predict_future_days(pred_days)
+        preds = []
+        for prediction in predictions:
+            for factor in scaling_factors:
+                if (high_data * factor) < prediction:
+                    preds.append(prediction / factor)
+                    break
+                if (low_data / factor) > prediction:
+                    preds.append(prediction * factor)
+                    break
+            else:
+                preds.append(prediction)
 
         # Return the predictions as JSON
-        return jsonify({'predictions': predictions})
+        return jsonify({'predictions': preds})
 
     # 404 Error handling
     @app.errorhandler(404)
