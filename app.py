@@ -1,3 +1,6 @@
+"""
+This script creates a Flask app that uses a trained LSTM model to predict future stock prices.
+"""
 from flask import Flask, request, jsonify
 import numpy as np
 import pandas as pd
@@ -12,13 +15,18 @@ scaler = MinMaxScaler()
 scaler.fit([[0], [1]])  # Adjust to the feature range and shape you used in training
 
 df = pd.read_csv('output.csv')  # Path to dataset
-time_step = 15  # Adjust according to the time step used in training
+TIME_STEP = 15  # Adjust according to the time step used in training
 
 
 # Define a function to predict future prices
 def predict_future_days(pred_days):
+    """
+    Predict future prices for the next `pred_days` days
+    :param pred_days: Number of days to predict
+    :return: List of predicted prices
+    """
     # Get the last known data for predictions (adjust according to data structure)
-    last_known_data = df['Close'][-time_step:].values  # Load the last data from dataset
+    last_known_data = df['Close'][-TIME_STEP:].values  # Load the last data from dataset
 
     # Convert the data to a list if it's in a different format
     last_known_data = last_known_data.tolist()
@@ -27,11 +35,11 @@ def predict_future_days(pred_days):
     lst_output = []
 
     # Predict future prices
-    for i in range(pred_days):
-        if len(last_known_data) > time_step:
+    for _ in range(pred_days):
+        if len(last_known_data) > TIME_STEP:
             # Prepare input for the model
-            x_input = np.array(last_known_data[-time_step:])
-            x_input = x_input.reshape((1, time_step, 1))
+            x_input = np.array(last_known_data[-TIME_STEP:])
+            x_input = x_input.reshape((1, TIME_STEP, 1))
 
             # Make prediction
             yhat = model.predict(x_input, verbose=0)
@@ -43,7 +51,7 @@ def predict_future_days(pred_days):
             lst_output.append(yhat[0].tolist()[0])
         else:
             # If not enough data, reshape the input and make prediction
-            x_input = np.array(last_known_data).reshape((1, time_step, 1))
+            x_input = np.array(last_known_data).reshape((1, TIME_STEP, 1))
             yhat = model.predict(x_input, verbose=0)
 
             # Add the prediction to the data and output list
@@ -51,13 +59,19 @@ def predict_future_days(pred_days):
             lst_output.append(yhat[0].tolist()[0])
 
     # Convert the predictions back to original scale
-    lst_output = scaler.inverse_transform(np.array(lst_output).reshape(-1, 1)).reshape(1, -1).tolist()[0]
+    lst_output = scaler.inverse_transform(
+        np.array(lst_output).reshape(-1, 1)
+    ).reshape(1, -1).tolist()[0]
 
     return lst_output
 
 
 # Create a Flask app
 def create_app():
+    """
+    Create a Flask app with a route for getting predictions
+    :return: Flask app
+    """
     app = Flask(__name__)
 
     # Define a route for getting predictions
