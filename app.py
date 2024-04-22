@@ -4,6 +4,8 @@ This script creates a Flask app that uses a trained LSTM model to predict future
 from flask import Flask, request, jsonify
 import numpy as np
 import pandas as pd
+# pylint: disable=import-error
+# pylint: disable=no-name-in-module
 from tensorflow.keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
 
