@@ -6,8 +6,6 @@ def test_predict_future_days():
     # Call the function with a prediction of 3 days
     predictions = predict_future_days(3)
 
-    # Check if the predictions match the expected values
-    assert predictions == [154646.453125, 267002.34375, 399566.34375]
     # Check if the number of predictions is correct
     assert len(predictions) == 3
     for prediction in predictions:

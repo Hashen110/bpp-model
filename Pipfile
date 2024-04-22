@@ -12,6 +12,7 @@ tensorflow = "*"
 pytest = "*"
 
 [dev-packages]
+pylint = "*"
 pytest = "*"
 pytest-cov = "*"
 
