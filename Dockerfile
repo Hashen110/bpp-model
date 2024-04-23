@@ -9,6 +9,7 @@ WORKDIR /app
 RUN pip3 install pipenv
 
 COPY ./Pipfile ./
+COPY ./Pipfile.lock ./
 
 RUN pipenv install --ignore-pipfile
 
